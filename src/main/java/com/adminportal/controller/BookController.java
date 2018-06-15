@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.Principal;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -24,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.adminportal.domain.Book;
 import com.adminportal.service.BookService;
-import com.adminportal.service.UserService;
 
 @Controller
 @RequestMapping("/book")
@@ -34,7 +32,7 @@ public class BookController {
 
 	@Autowired
 	private BookService bookService;
-
+	
 	@RequestMapping(value = "/add", method = RequestMethod.GET)
 	public String addNewBook(Model model) {
 		Book book = new Book();
