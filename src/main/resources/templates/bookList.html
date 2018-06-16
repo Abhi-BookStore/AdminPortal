@@ -20,7 +20,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr data-th-each="book : ${bookList}">
+					<tr data-th-each="book : ${bookList}" >
 						<!-- <td><input hidden="hidden" name="id" th:value="${book.id}" /></td> -->
 						<td ><a th:href="@{/book/bookInfo?id=}+${book.id}"><span th:text="${book.title}" ></span></a></td>
 						<td th:text="${book.author}" ></td>
@@ -28,7 +28,16 @@
 						<td th:text="${book.listPrice}" ></td>
 						<td th:text="${book.ourPrice}" ></td>
 						<td th:text="${book.active}" ></td>
-						<td><a th:href="@{/book/deleteBook?id=}+${book.id}">Delete</a></td>
+						<td>
+							<a th:href="@{/book/deleteBook?id=}+${book.id}">Delete</a>
+							<span> </span>
+							<div th:if="${book.active} == true">
+								<a th:href="@{/book/deactivateBook?id=}+${book.id}">Deactivate</a>
+							</div>
+							<div th:if="${book.active} == false">
+								<a th:href="@{/book/activateBook?id=}+${book.id}">Activate</a>
+							</div>
+						</td>
 					</tr>
 				</tbody>
 			</table>

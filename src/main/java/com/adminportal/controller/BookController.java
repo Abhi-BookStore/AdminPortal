@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.security.Principal;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -23,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.adminportal.domain.Book;
 import com.adminportal.service.BookService;
+import com.adminportal.service.UserService;
 
 @Controller
 @RequestMapping("/book")
@@ -77,7 +79,7 @@ public class BookController {
 		
 		List<Book> allBooks =  bookService.findAll();
 		model.addAttribute("bookList", allBooks);
-				
+		
 		return "bookList";
 	}
 	
@@ -145,6 +147,33 @@ public class BookController {
 		
 		return "bookList";
 	}
+	
+	@RequestMapping("/deactivateBook")
+	private String deactivateBook(Model model,
+								@RequestParam("id") Long bookId) {
+				
+		Book book = bookService.findOne(bookId);
+		if(book.isActive() == true) {
+			book.setActive(false);
+		}
+		bookService.save(book);
+		return "redirect:/book/bookList";
+		
+	}
+	
+	@RequestMapping("/activateBook")
+	private String activateBook(Model model,
+								@RequestParam("id") Long bookId) {
+				
+		Book book = bookService.findOne(bookId);
+		if(book.isActive() == false) {
+			book.setActive(true);
+		}
+		bookService.save(book);
+		return "redirect:/book/bookList";
+		
+	}
+
 	
 
 }
