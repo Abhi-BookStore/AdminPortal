@@ -16,7 +16,6 @@ import com.adminportal.service.UserService;
 import com.adminportal.utility.SecurityUtility;
 
 @SpringBootApplication
-@EnableAsync
 public class AdminportalApplication implements CommandLineRunner {
 	
 	@Autowired
