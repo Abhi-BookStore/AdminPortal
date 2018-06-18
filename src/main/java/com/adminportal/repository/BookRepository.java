@@ -10,6 +10,7 @@ import com.adminportal.domain.Book;
 @Repository
 public interface BookRepository extends CrudRepository<Book, Long> {
 
+	@SuppressWarnings("unchecked")
 	Book save(Book book);
 
 	List<Book> findAll();

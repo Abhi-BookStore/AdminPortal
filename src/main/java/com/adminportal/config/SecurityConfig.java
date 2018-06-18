@@ -44,6 +44,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		http.authorizeRequests().
 			antMatchers(publicMatcher)
 			.permitAll()
+			.antMatchers("/**").hasRole("ADMIN")
 			.anyRequest()
 			.authenticated();
 		
@@ -61,7 +62,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 		.deleteCookies("remember-me")
 		.permitAll()
 		.and()
-		.rememberMe();
+		.rememberMe()
+		.and()
+		.exceptionHandling().accessDeniedPage("/access-denied");
 			
 	}
 	

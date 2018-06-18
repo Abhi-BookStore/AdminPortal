@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.Principal;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -14,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -24,7 +24,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.adminportal.domain.Book;
 import com.adminportal.service.BookService;
-import com.adminportal.service.UserService;
+import com.adminportal.service.InStockNotificationService;
+import com.adminportal.utility.AsyncMethodUtils;
+import com.adminportal.utility.MailSenderUtilityService;
 
 @Controller
 @RequestMapping("/book")
@@ -34,6 +36,15 @@ public class BookController {
 
 	@Autowired
 	private BookService bookService;
+	
+	@Autowired
+	private InStockNotificationService inStockNotificationService;
+	
+	@Autowired
+	private MailSenderUtilityService mailSenderUtilityService;
+	
+	@Autowired
+	private AsyncMethodUtils asyncMethodUtils;
 	
 	@RequestMapping(value = "/add", method = RequestMethod.GET)
 	public String addNewBook(Model model) {
@@ -174,6 +185,31 @@ public class BookController {
 		
 	}
 
-	
+	@Async
+	@RequestMapping(value="/addBookQty", method=RequestMethod.POST)
+	private String addBookQty(Model model, 
+			@ModelAttribute("bookId") Long bookId,
+			@ModelAttribute("bookQty") int bookQty
+			) {
+		
+		log.info("Adding qty for book id: "+ bookId);
+		
+		Book book = bookService.findOne(bookId);
+		
+		// Adding notifyMe logic here
+		if(book.getInStockNumber() == 0 && bookQty > 0) {
+			// Async Method calls
+			asyncMethodUtils.notifyMeImplementation(bookId, book);
+			
+		}
+		
+		if(bookQty > 0) {
+			int totalQty = bookQty + book.getInStockNumber();
+			book.setInStockNumber(totalQty);
+			bookService.save(book);
+		}
+		
+		return "redirect:/book/bookInfo?id="+bookId;
+	}
 
 }

@@ -44,6 +44,12 @@ public class Book {
 	@OneToMany(mappedBy="book")
 	@JsonIgnore
 	private List<BookToCartItem> bookToCartItemList;
+	
+	/**
+	 * No args Constructor
+	 */
+	public Book() {
+	}
 
 	public Long getId() {
 		return id;

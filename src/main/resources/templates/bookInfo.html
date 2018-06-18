@@ -31,6 +31,14 @@
 						<p><strong>Language: </strong><span th:text="${book.language}"></span></p>
 						<p><strong>Category: </strong><span th:text="${book.category}"></span></p>
 						<p><strong>Pages: </strong><span th:text="${book.numberOfPages}"></span></p>
+						
+						<form th:action="@{/book/addBookQty}" method="post">
+							<input type="hidden" name="bookId" th:value="${book.id}" /> 
+							<strong style="color: green;">Add book quantity</strong> 
+							<input type="number" name="bookQty" th:value="0" /> 
+							<input type="submit" value="Add" />
+						</form><br/>
+
 					</div>
 					<div class="col-xs-6">
 						<p><strong>Format: </strong><span th:text="${book.format}"></span></p>
@@ -39,6 +47,7 @@
 						<p><strong>List Price: </strong><span th:text="${book.listPrice}"></span></p>
 						<p><strong>Our Price: </strong><span th:text="${book.ourPrice}"></span></p>
 						<p><strong>Numbers in Stock: </strong><span th:text="${book.inStockNumber}"></span></p>
+												
 					</div>
 				</div>
 				<p><strong>Description: </strong><span th:utext="${book.description}"></span></p>

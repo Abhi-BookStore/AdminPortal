@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 
 import com.adminportal.domain.User;
 import com.adminportal.domain.security.Role;
@@ -15,6 +16,7 @@ import com.adminportal.service.UserService;
 import com.adminportal.utility.SecurityUtility;
 
 @SpringBootApplication
+@EnableAsync
 public class AdminportalApplication implements CommandLineRunner {
 	
 	@Autowired
