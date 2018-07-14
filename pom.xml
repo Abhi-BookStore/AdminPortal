@@ -76,11 +76,13 @@
 			<artifactId>spring-context-support</artifactId>
 		</dependency>
 
+		<!-- AWS -->
 		<dependency>
 			<groupId>com.amazonaws</groupId>
 			<artifactId>aws-java-sdk</artifactId>
-			<version>1.11.133</version>
+			<version>1.11.106</version>
 		</dependency>
+
 
 		<dependency>
 			<groupId>org.slf4j</groupId>

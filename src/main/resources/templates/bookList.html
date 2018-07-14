@@ -4,7 +4,7 @@
 <head th:replace="common/header :: common-header" />
 <body>
 	<div th:replace="common/header :: navbar" />
-	
+
 	<div class="container">
 		<div class="table-responsive">
 			<table id="bookListTable" class="table table-bordered  table-hover table-striped" >
@@ -43,9 +43,9 @@
 			</table>
 		</div>
 	</div>
-	
+
 	<div th:replace="common/header :: body-bottom-scripts" />
-	
+
 	<script type="text/javascript">
 	$(document).ready(function(){
 		$("#bookListTable").DataTable({
@@ -54,7 +54,7 @@
 			stateSave : true
 		});
 	});
-		
+
 	</script>
 
 </body>

@@ -41,6 +41,8 @@ public class Book {
 	@Transient
 	private MultipartFile bookImage;
 	
+	private String bookImageUrl;
+	
 	@OneToMany(mappedBy="book")
 	@JsonIgnore
 	private List<BookToCartItem> bookToCartItemList;
@@ -194,7 +196,13 @@ public class Book {
 	public void setBookToCartItemList(List<BookToCartItem> bookToCartItemList) {
 		this.bookToCartItemList = bookToCartItemList;
 	}
-	
-	
 
+	public String getBookImageUrl() {
+		return bookImageUrl;
+	}
+
+	public void setBookImageUrl(String bookImageUrl) {
+		this.bookImageUrl = bookImageUrl;
+	}
+	
 }

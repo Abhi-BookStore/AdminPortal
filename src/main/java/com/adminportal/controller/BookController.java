@@ -1,11 +1,6 @@
 package com.adminportal.controller;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.net.URL;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -13,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -23,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.adminportal.domain.Book;
+import com.adminportal.s3.service.S3Services;
 import com.adminportal.service.BookService;
 import com.adminportal.service.InStockNotificationService;
 import com.adminportal.utility.AsyncMethodUtils;
@@ -46,6 +43,19 @@ public class BookController {
 	@Autowired
 	private AsyncMethodUtils asyncMethodUtils;
 	
+	@Autowired
+	private S3Services s3Services;
+
+	@Value("${jsa.s3.bucket}")
+	private String bucketName;
+	
+	public static final String DEFAULT_BOOK_IMAGE="https://s3.ap-south-1.amazonaws.com/bookstore-book-image/BookImages/defaultbook.png";
+
+	public static final String BOOK_IMAGE_PREFIX = "book_";
+	
+	public static final String BOOK_FOLDER_NAME = "BookImages";
+	public static final String SUFFIX = "/";
+	
 	@RequestMapping(value = "/add", method = RequestMethod.GET)
 	public String addNewBook(Model model) {
 		Book book = new Book();
@@ -58,20 +68,36 @@ public class BookController {
 		bookService.save(book);
 		log.info("Saving book.....");
 		
-		MultipartFile bookImage = book.getBookImage();
+		if(book.getBookImage().isEmpty()) {
+			log.info("$$$$$$$$$$$$$$$$$$$c  book.getImage() is empty "+ book.getBookImage());
+			book.setBookImageUrl(DEFAULT_BOOK_IMAGE);
+		}else {
+			log.info("$$$$$$$$$$$$$$$$$$$c  book.getImage() is not enpty  "+ book.getBookImage());
+			MultipartFile bookImageFile = book.getBookImage();
+			String bookImageName = BOOK_IMAGE_PREFIX + book.getTitle().trim() + "_" + book.getId()+ ".png";
+			
+			s3Services.uploadProfileImageToFolderInS3(bookImageFile, bookImageName, BOOK_FOLDER_NAME);
 
-		try {
-			byte[] bytes = bookImage.getBytes();
-			String name = book.getId() + ".png";
-			log.info("Name of the image: :::::: "+ name);
-
-			BufferedOutputStream stream = new BufferedOutputStream(
-					new FileOutputStream(new File("src/main/resources/static/image/book/" + name)));
-			stream.write(bytes);
-			stream.close();
-		} catch (IOException e) {
-			e.printStackTrace();
+			URL bookImageUrl = s3Services.getObjectAccessibleUrl(BOOK_FOLDER_NAME+SUFFIX+bookImageName);
+			log.info("************ bookImageUrl :::::  " + bookImageUrl.toString());
+			
+			book.setBookImageUrl(bookImageUrl.toString());
 		}
+		
+		bookService.save(book);
+		
+//		try {
+//			byte[] bytes = bookImageFile.getBytes();
+//			String name = book.getId() + ".png";
+//			log.info("Name of the image: :::::: "+ name);
+//
+//			BufferedOutputStream stream = new BufferedOutputStream(
+//					new FileOutputStream(new File("src/main/resources/static/image/book/" + name)));
+//			stream.write(bytes);
+//			stream.close();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
 
 		return "redirect:bookList";
 	}
@@ -120,27 +146,44 @@ public class BookController {
 	}
 	
 	@RequestMapping(value="/updateBook", method=RequestMethod.POST)
-	private String updateBookWithPost(@ModelAttribute("book") Book book, HttpServletRequest request) {
+	private String updateBookWithPost( Model model, @ModelAttribute("book") Book book, HttpServletRequest request) {
 
 		bookService.save(book);
 		
-		MultipartFile bookImage = book.getBookImage();
+		MultipartFile bookImageFile = book.getBookImage();
 
-		if(!bookImage.isEmpty()) {
-			try {
-				byte[] bytes = bookImage.getBytes();
-				String name = book.getId() + ".png";
-				
-				Files.delete(Paths.get("src/main/resources/static/image/book/" + name));
+		if(!bookImageFile.isEmpty()) {
+			
+			String bookImageName = BOOK_IMAGE_PREFIX + book.getTitle().trim() + "_" + book.getId()+ ".png";
+			
+//			s3Services.uploadProfileImageToS3(bookImageFile, bookImageName);
+			s3Services.uploadProfileImageToFolderInS3(bookImageFile, bookImageName, BOOK_FOLDER_NAME);
 
-				BufferedOutputStream stream = new BufferedOutputStream(
-						new FileOutputStream(new File("src/main/resources/static/image/book/" + name)));
-				stream.write(bytes);
-				stream.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			URL bookImageUrl = s3Services.getObjectAccessibleUrl(BOOK_FOLDER_NAME+SUFFIX+bookImageName);
+			log.info("************ bookImageUrl :::::  " + bookImageUrl.toString());
+			
+			book.setBookImageUrl(bookImageUrl.toString());			
+//			try {
+//				byte[] bytes = bookImage.getBytes();
+//				String name = book.getId() + ".png";
+//				
+//				Files.delete(Paths.get("src/main/resources/static/image/book/" + name));
+//
+//				BufferedOutputStream stream = new BufferedOutputStream(
+//						new FileOutputStream(new File("src/main/resources/static/image/book/" + name)));
+//				stream.write(bytes);
+//				stream.close();
+//			} catch (IOException e) {
+//				e.printStackTrace();
+//			}
+		}else {
+			book.setBookImageUrl(DEFAULT_BOOK_IMAGE);
 		}
+		bookService.save(book);
+		model.addAttribute("bookImageUrl", book.getBookImageUrl().toString());
+		
+		log.info("@@@@@@@@@@@@@@@@@@@@@@@@  bookImageUrl" + book.getBookImageUrl().toString());
+		
 		return "redirect:/book/bookInfo?id="+book.getId();
 	}
 
